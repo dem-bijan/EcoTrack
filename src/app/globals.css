@@ -4,3 +4,4 @@
 body {
   min-width: 61rem;
 }
+@theme {  --color-gold: #ffd070;  --color-bronze: #CD7F32;  --color-bermuda: #78dcca;}
