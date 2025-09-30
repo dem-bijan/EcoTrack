@@ -1,5 +1,9 @@
+import { useRouter } from "next/navigation"
 
 export default function Login() {
+  const router = useRouter();
+  
+  
   return (
     <div >
         <button
@@ -7,7 +11,7 @@ export default function Login() {
                after:absolute after:left-1 after:bottom-1 after:h-0.5 after:w-full 
                after:origin-bottom after:scale-x-5
                after:transition-transform after:duration-400
-               hover:after:scale-x-50 after:bg-white">
+               hover:after:scale-x-50 after:bg-white" onClick={()=> router.push("./login")} >
           Login
         </button>
         <button

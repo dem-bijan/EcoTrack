@@ -1,15 +1,17 @@
 import textshadow from 'tailwindcss-textshadow';
 
-export default {
+const tailwindConfig = {
   content: [
     './src/**/*.{html,js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
-      textShadow: {
-        'outline': '1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
-      }
+      fontFamily: {
+        signature: ['Signature', 'cursive'],
+      },
     },
   },
   plugins: [textshadow],
 };
+
+export default tailwindConfig;

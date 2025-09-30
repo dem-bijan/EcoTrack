@@ -2,9 +2,9 @@ import Image from "next/image";
 
 export default function LeaderBoard() {
     return (
-        <div className="w-full min-w-[900px] h-300 bg-red/90 flex flex-col items-center mb-10">
+        <div className="w-[100vw] min-w-[900px] h-300 bg-red/90 flex flex-col backdrop-blur-xs items-center mb-10">
             {/* first 3 goes here */}
-            <div className="flex w-8/10 bg-white/10 backdrop-blur-[20px] rounded-2xl mt-30 h-2/6 flex-row items-end gap-2 ">
+            <div className="flex w-5/10 bg-white/10 backdrop-blur-[30px] rounded-2xl mt-30 h-2/6 flex-row items-end gap-2 ">
                 {/* 1st user: David */}
                 <div className="flex-1 flex  flex-col-reverse h-9/10 ">
                     {/* gradient Silver */}
@@ -59,7 +59,32 @@ export default function LeaderBoard() {
             </div>
 
             {/* rest goes here */}
-            <div></div>
+            <div className="flex w-7/10 mt-6 h-1/6 gap-4 flex-col items-center ">
+                {/* 4th user */}
+                <div className="w-7/10 bg-cyan-950/70  rounded-full border-1 border-cyan-500 flex-1 flex flex-row items-center">
+                    <div className="flex-1">
+                        <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
+                                <Image src="/johnson.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
+                        </div>
+                    </div>
+                    <div className="flex-3 flex flex-col text-center text-cyan-200 text-m font-bold ">
+                        <div>David Johansoon</div>
+                        <div>Scored : 2984 points</div>
+                    </div>
+                </div>
+                {/* 5th user*/}
+                <div className="w-7/10 bg-cyan-950/70  rounded-full border-1 border-cyan-500 flex-1 flex flex-row items-center">
+                    <div className="flex-1">
+                        <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
+                                <Image src="/allan.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
+                            </div>
+                    </div>
+                    <div className="flex-3 flex flex-col text-center text-cyan-200 text-m font-bold ">
+                        <div>Johnathan Alan</div>
+                        <div>Scored : 2914 points</div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

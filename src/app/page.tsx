@@ -5,7 +5,6 @@ import { TypeAnimation } from 'react-type-animation';
 import LeaderBoard from "./components/LeaderBoard";
 
 export default function Home() {
-
   const imageSrc = [
   "https://media.istockphoto.com/id/1340519929/photo/concept-depicting-the-issue-of-carbon-dioxide-emissions-and-its-impact-on-nature-in-the-form.webp?s=2048x2048&w=is&k=20&c=cUkLVMxwNBSrm-WDJjUJK2ySl5y9b4ssNqrCmT1jDyY=",
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80","https://media.istockphoto.com/id/1323823418/photo/low-angle-view-thermometer-on-blue-sky-with-sun-shining.webp?s=2048x2048&w=is&k=20&c=vs-wMhpIBhtgOfVrwVCGOIqto--JCLnYkunCXaq0F7c="];
@@ -77,7 +76,7 @@ export default function Home() {
               We have less than 16 years before irreversible damage
             </div>
             {/*Cards*/}
-            <div className="flex flex-row justify-center mt-8 gap-40">
+            <div className="flex flex-row justify-center mt-8  w-[100vw]  gap-40">
               <Card
                 title={TitleCard[0]}
                 description={DescriptionCard[0]}
@@ -101,7 +100,7 @@ export default function Home() {
               />
             </div>
           </div>
-          <div className="relative z-10 w-full flex flex-col items-center mt-20 mb-10">
+          <div className="relative z-10 w-full  flex flex-col items-center mt-20 mb-10">
             <LeaderBoard />
           </div>
         </div>
