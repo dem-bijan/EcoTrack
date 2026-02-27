@@ -1,90 +1,98 @@
 import Image from "next/image";
 
-export default function LeaderBoard() {
+interface LeaderboardEntry {
+    id: string;
+    userName: string;
+    avatarUrl: string | null;
+    score: number;
+    impact: string;
+    rank: number;
+}
+
+interface LeaderBoardProps {
+    entries?: LeaderboardEntry[];
+}
+
+export default function LeaderBoard({ entries = [] }: LeaderBoardProps) {
+    const rank1 = entries.find(e => e.rank === 1);
+    const rank2 = entries.find(e => e.rank === 2);
+    const rank3 = entries.find(e => e.rank === 3);
+    const rest = entries.filter(e => e.rank > 3);
+
     return (
-        <div className="w-[100vw] min-w-[900px] h-300 bg-red/90 flex flex-col backdrop-blur-xs items-center mb-10">
-            {/* first 3 goes here */}
-            <div className="flex w-5/10 bg-white/10 backdrop-blur-[30px] rounded-2xl mt-30 h-2/6 flex-row items-end gap-2 ">
-                {/* 1st user: David */}
-                <div className="flex-1 flex  flex-col-reverse h-9/10 ">
-                    {/* gradient Silver */}
-                    <div className="h-1/2 rounded-tl-lg shadow bg-gradient-to-bl from-gray-500 to-gray-300 " ></div>
-                    {/* Infos */}
-                    <div className="h-1/2 flex flex-col-reverse justify-between  ">
-                        <div className="text-center font-sans text-white font-bold ">
-                            Mr Johnson Saved 22 Tons in 3 months he scored: 3023 points
-                        </div>
-                        <div className="flex flex-row-reverse font-sans text-2xl text-center font-bold ">
-                            <div className="flex-3 text-white p-4">David Johnson</div>
-                            <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
-                                <Image src="/johnson.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div className="w-full max-w-6xl mx-auto px-4 py-12 flex flex-col items-center gap-12">
+            <h2 className="text-4xl font-bold text-white mb-4 text-shadow-lg">Impact Leaderboard</h2>
 
-                {/* 2nd user: George */}
-                <div className="flex-1 flex shadow-xl/30 flex-col-reverse  h-9/10 ">
-                    {/* gradient Gold */}
-                    <div className="h-3/5 rounded-t-lg bg-gradient-to-b from-yellow-400 to-yellow-200 " ></div>
-                    <div className="h-2/5 flex flex-col-reverse justify-between  ">
-                        <div className="text-center font-sans text-white font-bold ">
-                            Mr George Saved 18 Tons in 3 months, he scored: 3800 points
+            {/* Podium Section */}
+            <div className="flex flex-col md:flex-row items-end justify-center gap-4 w-full h-[500px] md:h-[400px]">
+                {/* 2nd Place - Silver */}
+                {rank2 && (
+                    <div className="flex-1 flex flex-col items-center w-full md:w-auto order-2 md:order-1 h-3/4">
+                        <div className="relative w-20 h-20 mb-4 ring-4 ring-gray-300 rounded-full overflow-hidden shadow-xl">
+                            <Image src={rank2.avatarUrl || "/johnson.jpg"} alt={rank2.userName} fill className="object-cover" />
                         </div>
-                        <div className="flex flex-row-reverse font-sans text-2xl text-center font-bold ">
-                            <div className="flex-3 text-white p-4">George</div>
-                            <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
-                                <Image src="/george.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
+                        <div className="w-full bg-gradient-to-t from-gray-500/80 to-gray-300/40 backdrop-blur-md rounded-t-2xl p-6 flex flex-col items-center justify-between flex-1 shadow-2xl border-x border-t border-white/20">
+                            <div className="text-center">
+                                <p className="text-white font-bold text-xl">{rank2.userName}</p>
+                                <p className="text-gray-200 text-sm">{rank2.impact}</p>
                             </div>
+                            <div className="text-3xl font-black text-gray-100 mt-4">{rank2.score} pts</div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* 3rd user: Allan */}
-                <div className="flex-1 flex flex-col-reverse h-9/10 ">
-                    {/* gradient Bronze */}
-                    <div className="h-1/4 rounded-tr-lg bg-gradient-to-br from-orange-500 to-yellow-50 " ></div>
-                    <div className="h-3/4 flex flex-col-reverse justify-between  ">
-                        <div className="text-center font-sans text-white font-bold ">
-                            Mr Allan Saved 15 Tons in 3 months he scored: 2600 points
+                {/* 1st Place - Gold */}
+                {rank1 && (
+                    <div className="flex-1 flex flex-col items-center w-full md:w-auto order-1 md:order-2 h-full z-10 scale-105 md:scale-110">
+                        <div className="relative w-24 h-24 mb-4 ring-4 ring-yellow-400 rounded-full overflow-hidden shadow-2xl">
+                            <Image src={rank1.avatarUrl || "/george.jpg"} alt={rank1.userName} fill className="object-cover" />
                         </div>
-                        <div className="flex flex-row-reverse font-sans text-2xl text-center font-bold ">
-                            <div className="flex-3 text-white p-4">Allan</div>
-                            <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
-                                <Image src="/allan.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
+                        <div className="w-full bg-gradient-to-t from-yellow-600/80 to-yellow-400/40 backdrop-blur-md rounded-t-2xl p-8 flex flex-col items-center justify-between flex-1 shadow-[0_-20px_50px_rgba(234,179,8,0.3)] border-x border-t border-yellow-200/30">
+                            <div className="text-center">
+                                <p className="text-white font-bold text-2xl">{rank1.userName}</p>
+                                <p className="text-yellow-100 text-sm">{rank1.impact}</p>
                             </div>
+                            <div className="text-4xl font-black text-white mt-4">{rank1.score} pts</div>
                         </div>
                     </div>
-                </div>
+                )}
+
+                {/* 3rd Place - Bronze */}
+                {rank3 && (
+                    <div className="flex-1 flex flex-col items-center w-full md:w-auto order-3 md:order-3 h-2/3">
+                        <div className="relative w-20 h-20 mb-4 ring-4 ring-orange-400 rounded-full overflow-hidden shadow-xl">
+                            <Image src={rank3.avatarUrl || "/allan.jpg"} alt={rank3.userName} fill className="object-cover" />
+                        </div>
+                        <div className="w-full bg-gradient-to-t from-orange-700/80 to-orange-500/40 backdrop-blur-md rounded-t-2xl p-6 flex flex-col items-center justify-between flex-1 shadow-2xl border-x border-t border-white/20">
+                            <div className="text-center">
+                                <p className="text-white font-bold text-xl">{rank3.userName}</p>
+                                <p className="text-orange-100 text-sm">{rank3.impact}</p>
+                            </div>
+                            <div className="text-3xl font-black text-orange-50 mt-4">{rank3.score} pts</div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* rest goes here */}
-            <div className="flex w-7/10 mt-6 h-1/6 gap-4 flex-col items-center ">
-                {/* 4th user */}
-                <div className="w-7/10 bg-cyan-950/70  rounded-full border-1 border-cyan-500 flex-1 flex flex-row items-center">
-                    <div className="flex-1">
-                        <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
-                                <Image src="/johnson.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
-                        </div>
-                    </div>
-                    <div className="flex-3 flex flex-col text-center text-cyan-200 text-m font-bold ">
-                        <div>David Johansoon</div>
-                        <div>Scored : 2984 points</div>
-                    </div>
-                </div>
-                {/* 5th user*/}
-                <div className="w-7/10 bg-cyan-950/70  rounded-full border-1 border-cyan-500 flex-1 flex flex-row items-center">
-                    <div className="flex-1">
-                        <div className="flex-1 rounded-full ml-4 relative h-16 w-16">
-                                <Image src="/allan.jpg" alt="card-image" fill className="object-cover opacity-75 rounded-full" priority />
+            {/* List Section */}
+            {rest.length > 0 && (
+                <div className="w-full max-w-2xl flex flex-col gap-4 mt-8">
+                    {rest.map((entry) => (
+                        <div key={entry.id} className="bg-cyan-950/40 backdrop-blur-xl rounded-full border border-cyan-500/30 p-2 flex flex-row items-center hover:bg-cyan-900/60 transition-all cursor-pointer group shadow-lg">
+                            <div className="relative h-12 w-12 rounded-full overflow-hidden ml-2 group-hover:scale-110 transition-transform">
+                                <Image src={entry.avatarUrl || "/johnson.jpg"} alt={entry.userName} fill className="object-cover" />
                             </div>
-                    </div>
-                    <div className="flex-3 flex flex-col text-center text-cyan-200 text-m font-bold ">
-                        <div>Johnathan Alan</div>
-                        <div>Scored : 2914 points</div>
-                    </div>
+                            <div className="flex-1 px-6">
+                                <p className="text-cyan-50 font-bold text-lg">{entry.userName}</p>
+                                <p className="text-cyan-300/80 text-sm">{entry.impact}</p>
+                            </div>
+                            <div className="pr-8 text-cyan-200 font-black text-xl">
+                                {entry.score} <span className="text-xs font-normal">pts</span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
+            )}
         </div>
     );
 }

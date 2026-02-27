@@ -6,16 +6,20 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Create a dummy test document
-    const testDoc = await prisma.test.create({
-      data: { name: "Prisma Test", createdAt: new Date() },
+    // Create a dummy user
+    const testUser = await prisma.user.create({
+      data: {
+        email: `test_${Date.now()}@example.com`,
+        name: "Prisma Test",
+        password: "password123"
+      },
     });
 
-    console.log("Connection successful ✅", testDoc);
+    console.log("Connection successful ✅", testUser);
 
     // Read it back
-    const allDocs = await prisma.test.findMany();
-    console.log("All documents:", allDocs);
+    const allUsers = await prisma.user.findMany();
+    console.log("All users:", allUsers);
   } catch (error) {
     console.error("Connection failed ❌", error);
   } finally {
