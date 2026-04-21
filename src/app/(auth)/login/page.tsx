@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TypeAnimation } from 'react-type-animation';
 import axios from "axios";
 
+
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = React.useState({ email: "", password: "" });
@@ -17,25 +18,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/users";
+      // Hit our completely new secure Next.js Server Bridge!
+      const response = await axios.post("/api/auth/login", {
+        email: formData.email,
+        password: formData.password
+      });
 
-      // Since we don't have a dedicated Spring Security login endpoint yet,
-      // we'll fetch users and verify manually for now (Mock Login Flow).
-      // In production, NEVER fetch all users to the frontend.
-      const response = await axios.get(API_URL);
-      const users = response.data;
-
-      const user = users.find((u: any) => u.email === formData.email && u.passwordHash === formData.password);
-
-      if (user) {
-        // Mock a token for now since Spring isn't generating one yet
-        localStorage.setItem("token", "mock-jwt-token-from-spring");
+      // If successful, the proxy has securely planted the HttpOnly cookie!
+      if (response.status === 200) {
         router.push("/dashboard");
-      } else {
-        setError("Invalid email or password combination.");
       }
     } catch (err: any) {
-      setError("Unable to connect to the backend server.");
+      setError(err.response?.data?.message || "Invalid email or password combination.");
     } finally {
       setLoading(false);
     }

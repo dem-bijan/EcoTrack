@@ -22,11 +22,11 @@ export default function SignupPage() {
         setError("");
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/users";
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/auth/signup";
             await axios.post(API_URL, {
-                fullName: formData.fullName,
+                fullname: formData.fullName,
                 email: formData.email,
-                passwordHash: formData.password
+                passwordhash: formData.password
             });
             router.push("/signup/success");
         } catch (err: any) {
