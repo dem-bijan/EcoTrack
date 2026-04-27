@@ -46,11 +46,15 @@ export default function ProfileImageUploader() {
     return (
         <div className="flex items-center gap-8">
             {/* The Actual Display Image */}
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D3033] shadow-lg bg-[#101214]">
+            <div
+                className="relative rounded-full overflow-hidden border border-[#2D3033] shadow-lg bg-[#101214] flex-shrink-0"
+                style={{ width: '96px', height: '96px', minWidth: '96px', minHeight: '96px' }}
+            >
                 <img
                     src={preview}
                     alt="Avatar"
-                    className={`w-full h-full object-cover transition-all duration-300 ${loading ? 'opacity-30 blur-sm scale-110' : 'opacity-100 scale-100'}`}
+                    className="w-full h-full object-cover"
+                    style={{ display: 'block', width: '100%', height: '100%' }}
                 />
             </div>
 

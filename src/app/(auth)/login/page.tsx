@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TypeAnimation } from 'react-type-animation';
 import axios from "axios";
-
+import { Leaf, ArrowRight, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,18 +16,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
-      // Hit our completely new secure Next.js Server Bridge!
       const response = await axios.post("/api/auth/login", {
         email: formData.email,
         password: formData.password
       });
-
-      // If successful, the proxy has securely planted the HttpOnly cookie!
-      if (response.status === 200) {
-        router.push("/dashboard");
-      }
+      if (response.status === 200) { router.push("/dashboard"); }
     } catch (err: any) {
       setError(err.response?.data?.message || "Invalid email or password combination.");
     } finally {
@@ -36,100 +30,114 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-transparent">
-      {/* Hero Section / Navigation Back */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-            <span className="text-2xl font-bold text-slate-900">E</span>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      {/* Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-5">
+        <Link href="/" className="inline-flex items-center gap-2 group">
+          <div className="w-7 h-7 bg-emerald-500 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 shadow-lg shadow-emerald-500/20">
+            <Leaf className="w-4 h-4 text-black" strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-extrabold tracking-tight font-outfit bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+          <span className="text-sm font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 font-outfit">
             EcoTrack
           </span>
         </Link>
       </nav>
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-sm">
+        {/* Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold font-outfit mb-2">Welcome <span className="animated-gradient-text">Back</span></h1>
-          <p className="text-slate-400 font-medium">Continue your journey for a greener earth.</p>
+          <h1 className="text-3xl font-black font-outfit mb-2">
+            Welcome <span className="animated-gradient-text">Back</span>
+          </h1>
+          <p className="text-sm text-slate-500">Continue your journey for a greener earth.</p>
         </div>
 
-        <div className="glass-card rounded-[2.5rem] p-10 border-white/10 shadow-2xl relative">
-          {/* Subtle glow effect */}
-          <div className="absolute -top-10 -left-10 w-32 h-32 bg-emerald-500/20 blur-[80px] rounded-full" />
-          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/20 blur-[80px] rounded-full" />
+        {/* Card */}
+        <div className="glass-card rounded-2xl p-8 relative overflow-hidden">
+          {/* Corner glows */}
+          <div className="absolute -top-12 -left-12 w-28 h-28 bg-emerald-500/15 blur-[60px] rounded-full pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 w-28 h-28 bg-blue-500/15 blur-[60px] rounded-full pointer-events-none" />
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-500 text-sm font-medium">
+            <div className="mb-5 p-3.5 rounded-xl text-sm font-medium text-red-400"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+            >
               {error}
             </div>
           )}
 
-          <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-300 ml-1">Email Address</label>
+          <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-0.5">Email</label>
               <input
                 type="email"
                 required
-                placeholder="Enter your email"
+                placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full h-14 bg-slate-900/50 border border-white/10 rounded-2xl px-5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 placeholder:text-slate-600"
+                className="form-input h-12"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-300 ml-1">Password</label>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between ml-0.5">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Password</label>
+                <a href="#" className="text-xs text-emerald-500 hover:text-emerald-400 font-semibold transition-colors">Forgot?</a>
+              </div>
               <input
                 type="password"
                 required
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full h-14 bg-slate-900/50 border border-white/10 rounded-2xl px-5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300 placeholder:text-slate-600"
+                className="form-input h-12"
               />
             </div>
 
-            <div className="flex items-center justify-between px-1">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50" />
-                <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Remember me</span>
+            <div className="flex items-center gap-2.5 px-0.5">
+              <input
+                type="checkbox"
+                id="remember"
+                className="w-4 h-4 rounded-md border-white/10 bg-slate-900 accent-emerald-500"
+              />
+              <label htmlFor="remember" className="text-sm text-slate-500 cursor-pointer hover:text-slate-400 transition-colors">
+                Remember me
               </label>
-              <a href="#" className="text-sm text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">Forgot Password?</a>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/25 active:scale-95 shadow-lg group"
+              className="w-full h-12 btn-primary rounded-xl text-sm font-bold shadow-lg"
             >
-              {loading ? "Signing In..." : "Sign In"}
-              {!loading && <span className="inline-block transition-transform group-hover:translate-x-1 ml-2">→</span>}
+              {loading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
+                : <>Sign In <ArrowRight className="w-4 h-4" /></>
+              }
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-white/5 pt-6">
-            <p className="text-slate-400 font-medium">
+          <div className="mt-6 pt-5 border-t text-center" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+            <p className="text-sm text-slate-500">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+              <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
                 Join the Mission
               </Link>
             </p>
           </div>
         </div>
 
-        {/* Dynamic Typing Message */}
-        <div className="mt-8 text-center text-slate-500 font-medium text-sm italic">
+        {/* Typing tagline */}
+        <p className="mt-7 text-center text-xs text-slate-600 italic">
           <TypeAnimation
             sequence={[
-              'Carbon neutral is the goal.', 2000,
-              'Every small action counts.', 2000,
-              'Together for a better future.', 2000,
+              'Carbon neutral is the goal.', 2500,
+              'Every small action counts.', 2500,
+              'Together for a better future.', 2500,
             ]}
             repeat={Infinity}
           />
-        </div>
+        </p>
       </div>
     </div>
   );

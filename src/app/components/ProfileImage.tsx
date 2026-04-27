@@ -1,12 +1,9 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function ProfileImage() {
     const [preview, setPreview] = useState<string>("https://api.dicebear.com/7.x/initials/svg?seed=EcoWarrior&backgroundColor=10b981");
-
-    // We will use a Ref to link a beautiful custom button directly to the ugly HTML file input
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // FETCH IMAGE ON PAGE LOAD
     useEffect(() => {
@@ -22,15 +19,16 @@ export default function ProfileImage() {
     }, []);
 
     return (
-        <div className="flex items-center gap-8">
-            {/* The Actual Display Image */}
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D3033] shadow-lg bg-[#101214]">
-                <img
-                    src={preview}
-                    alt="Avatar"
-                    className={`w-full h-full object-cover transition-all duration-300`}
-                />
-            </div>
+        <div
+            className="rounded-full overflow-hidden border border-[#2D3033] bg-[#101214] flex-shrink-0"
+            style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}
+        >
+            <img
+                src={preview}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+                style={{ display: 'block', width: '100%', height: '100%' }}
+            />
         </div>
     );
 }
