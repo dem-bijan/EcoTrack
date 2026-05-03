@@ -4,8 +4,6 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import axios from "axios"
-import { TypeAnimation } from "react-type-animation"
-
 export default function OnBoardingPage() {
     const router = useRouter();
     const [step, setStep] = useState(1);

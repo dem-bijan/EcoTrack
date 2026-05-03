@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:webdorks.com)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

@@ -1,8 +1,18 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import AmbientChat from "@/app/components/AmbientChat";
 import { TrendingDown, Zap, BarChart3, Clock, AlertCircle, Sparkles, ArrowUpRight } from "lucide-react";
+import RecommendationsList from "@/app/components/RecommendationsList";
+import { cache } from "react";
+import AchievementsList from "@/app/components/AchievementsList";
+
+
+type JwtPayload = {
+    sub: string;
+    filled_form: boolean;
+    exp: number;
+};
 
 export default async function DashboardPage() {
     // 1. SECURE SERVER INQUIRY
@@ -10,6 +20,15 @@ export default async function DashboardPage() {
     const token = cookieStore.get('jwt_token')?.value;
 
     if (!token) { redirect("/login"); }
+
+
+
+    //new Recommendations fetching
+    const recsResponse = await fetch("http://localhost:8080/api/recommendations", {
+        headers: { "Authorization": `Bearer ${token}` },
+        cache: "no-store"
+    })
+    const recommendations = recsResponse.ok ? await recsResponse.json() : [];
 
     // 2. LIVE FETCH FROM BACKEND
     const springResponse = await fetch("http://localhost:8080/api/users/me", {
@@ -29,43 +48,52 @@ export default async function DashboardPage() {
         redirect("/login");
     }
 
-    // MOCK DATA
-    const mockFootprint = {
-        total: "4.2",
-        avgLocal: "8.5",
-        recentActivities: [
-            { id: "act_101", title: "Train commute (Round trip)", category: "Transport", impact: "-2.10 kg", date: "2026-04-19" },
-            { id: "act_102", title: "Plant-based meal substitution", category: "Food", impact: "-4.50 kg", date: "2026-04-18" },
-            { id: "act_103", title: "Installed LED lighting", category: "Housing", impact: "-10.00 kg", date: "2026-04-15" },
-        ]
-    };
+    //Fetch Real Activities
+
+    const ActivitiesRes = await fetch("http://localhost:8080/api/activities/me", {
+        headers: { "Authorization": `Bearer ${token}` },
+        cache: "no-store"
+    })
+    const activities = ActivitiesRes.ok ? await ActivitiesRes.json() : [];
+
+    const totalImpact = activities.reduce((sum: number, act: any) => sum + act.co2Impact, 0).toFixed(2);
+    const activeLogs = activities.length
+
+    const efficiency = (((8.5 - (parseFloat(totalImpact) / 1000)) / 8.5) * 100).toFixed(0)
 
     const metrics = [
         {
             label: "Total Footprint",
-            value: mockFootprint.total,
-            unit: "Tons / YR",
+            value: (parseFloat(totalImpact) / 1000).toFixed(2),
+            unit: "Tons / CO2",
             icon: BarChart3,
             iconColor: "text-slate-500",
             valueColor: "text-white",
         },
         {
             label: "Efficiency Index",
-            value: "-51%",
-            sub: `vs ${mockFootprint.avgLocal}t local threshold`,
+            value: `${efficiency}%`,
+            sub: `vs 8.5t local threshold`,
             icon: TrendingDown,
             iconColor: "text-emerald-500",
             valueColor: "text-emerald-400",
         },
         {
             label: "Active Logs",
-            value: String(mockFootprint.recentActivities.length),
+            value: String(activeLogs),
             unit: "Events",
             icon: Zap,
             iconColor: "text-amber-500",
             valueColor: "text-white",
         },
     ];
+
+    //Fetch Achievements
+    const achievementsRes = await fetch("http://localhost:8080/api/achievements/me", {
+        headers: { "Authorization": `Bearer ${token}` },
+        cache: "no-store"
+    })
+    const achievements = achievementsRes.ok ? await achievementsRes.json() : []
 
     return (
         <div className="min-h-screen w-full font-sans selection:bg-emerald-500/20 pb-24">
@@ -127,6 +155,8 @@ export default async function DashboardPage() {
                     })}
                 </div>
 
+                <AchievementsList achievements={achievements}></AchievementsList>
+
                 {/* ── Main Content Grid ────────────────────────────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -150,32 +180,46 @@ export default async function DashboardPage() {
                                             <th className="py-4 px-5 eyebrow">Event</th>
                                             <th className="py-4 px-5 eyebrow">Category</th>
                                             <th className="py-4 px-5 eyebrow">Date</th>
-                                            <th className="py-4 px-5 eyebrow text-right">Offset</th>
+                                            <th className="py-4 px-5 eyebrow text-right">Impact</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {mockFootprint.recentActivities.map((act, i) => (
-                                            <tr
-                                                key={i}
-                                                className="group transition-colors hover:bg-white/[0.02] border-b last:border-0"
-                                                style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-                                            >
-                                                <td className="py-4 px-5">
-                                                    <span className="text-sm text-slate-300 font-medium group-hover:text-white transition-colors">
-                                                        {act.title}
-                                                    </span>
-                                                </td>
-                                                <td className="py-4 px-5">
-                                                    <span className="tag">{act.category}</span>
-                                                </td>
-                                                <td className="py-4 px-5">
-                                                    <span className="text-xs text-slate-600 font-mono">{act.date}</span>
-                                                </td>
-                                                <td className="py-4 px-5 text-right">
-                                                    <span className="text-sm font-bold text-emerald-400 font-mono">{act.impact}</span>
+                                        {activities.length > 0 ? (
+                                            activities.map((act: any, i: number) => (
+                                                <tr
+                                                    key={i}
+                                                    className="group transition-colors hover:bg-white/[0.02] border-b last:border-0"
+                                                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+                                                >
+                                                    <td className="py-4 px-5">
+                                                        <span className="text-sm text-slate-300 font-medium group-hover:text-white transition-colors">
+                                                            {act.description}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 px-5">
+                                                        <span className="tag uppercase">{act.activityCategory}</span>
+                                                    </td>
+                                                    <td className="py-4 px-5">
+                                                        <span className="text-xs text-slate-600 font-mono">
+                                                            {new Date(act.activityDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 px-5 text-right">
+                                                        <span className={`text-sm font-bold font-mono ${act.co2Impact > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                                            {act.co2Impact > 0 ? `+${act.co2Impact}` : act.co2Impact} kg
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={4} className="py-20 text-center">
+                                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest opacity-40">
+                                                        No activities recorded yet.
+                                                    </p>
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -186,8 +230,18 @@ export default async function DashboardPage() {
                     <div className="space-y-5">
                         <h2 className="text-xs font-bold text-white uppercase tracking-[0.25em] flex items-center gap-2 mb-4">
                             <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                            Active Insights
+                            AI Recommendations
                         </h2>
+
+                        {recommendations.length > 0 ? (
+                            <RecommendationsList recommendations={recommendations} />
+                        ) : (
+                            <div className="panel p-8 text-center rounded-2xl opacity-50">
+                                <p className="text-xs text-slate-500 font-medium">
+                                    No insights yet. Chat with the AI to discover improvements!
+                                </p>
+                            </div>
+                        )}
 
                         {/* Efficiency Alert */}
                         <div className="relative overflow-hidden rounded-2xl p-5 group transition-all cursor-pointer"

@@ -1,0 +1,26 @@
+ECOTRACK PROJECT PROGRESS REPORT
+-----------------------------
+Last Updated: 2026-05-01
+
+1. PROJECT SUMMARY
+EcoTrack is a sustainability platform designed to track and reduce carbon footprints. It uses a high-end glassmorphic UI (Next.js) and a powerful Spring Boot backend.
+
+2. COMPLETED MILESTONES
+- UI/UX: Implemented landing page, dashboard, and onboarding with glassmorphism and Framer Motion.
+- AI Integration: Successfully switched from local Ollama to NVIDIA's GPT-OSS-120B model (hosted via NVIDIA Integrate API).
+- Backend Foundation: Created 'Activity' infrastructure (Entity, Repository, Service) to support persistent tracking.
+- AI Logic: Refactored AiController into a "Sustainability Auditor" that extracts JSON data [LOG:...] from natural conversation.
+- Security: Integrated JWT authentication with Spring Security for safe activity logging.
+
+3. CURRENT SYSTEM STATE
+- Backend: Exposes /api/ai which accepts a ChatRequest DTO (with conversation history).
+- AI Persona: Configured with a detailed system prompt including specific emission factors for transportation, food, energy, shopping, and waste.
+- Data Flow: AI extracts data -> Controller parses JSON -> Service saves to PostgreSQL using the current user's security context.
+
+4. NEXT STEPS
+- Frontend: Sync AmbientChat.tsx to send conversation history instead of single messages.
+- Dashboards: Implement data visualization for the logged activities.
+- Real-time Updates: Use WebSockets or polling to update the efficiency index immediately after AI logs an activity.
+
+5. DATABASE SCHEMA
+Refer to database_schema.sql for the current 13-table structure.

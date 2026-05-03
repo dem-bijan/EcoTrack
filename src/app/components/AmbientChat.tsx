@@ -2,13 +2,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, X, Bot, ChevronDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface Message {
     role: "user" | "ai";
     content: string;
+    impactSummary?: string;
 }
 
 export default function AmbientChat({ token }: { token: string | undefined }) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [chatHistory, setChatHistory] = useState<Message[]>([
@@ -35,25 +38,40 @@ export default function AmbientChat({ token }: { token: string | undefined }) {
         if (!textToSend.trim() || loading) return;
 
         const userMsg: Message = { role: "user", content: textToSend };
-        setChatHistory(prev => [...prev, userMsg]);
+        const updatedHistory = [...chatHistory, userMsg]
+
+        setChatHistory(updatedHistory)
         setMessage("");
         setLoading(true);
         setError(null);
 
         try {
-            const res = await fetch("http://localhost:8080/api/ollama", {
+            const res = await fetch("http://localhost:8080/api/ai", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: textToSend,
+                body: JSON.stringify({
+                    messages: updatedHistory.map(m => ({
+                        role: m.role === 'ai' ? 'assistant' : 'user',
+                        content: m.content
+                    }))
+                }),
             });
 
-            if (!res.ok) throw new Error(`Server responded with status: ${res.status}`);
-            const data = await res.text();
 
-            setChatHistory(prev => [...prev, { role: "ai", content: data }]);
+            if (!res.ok) throw new Error(`Server responded with status: ${res.status}`);
+            const data = await res.json();
+            if (data.summary) {
+                router.refresh()
+            }
+
+            setChatHistory(prev => [...prev, {
+                role: "ai",
+                content: data.text,
+                impactSummary: data.summary
+            }]);
         } catch (err: any) {
             setError(err.message || "Failed to get response. Please try again.");
             setChatHistory(prev => [...prev, { role: "ai", content: "Sorry, I encountered an error. Please try again later." }]);
@@ -124,8 +142,8 @@ export default function AmbientChat({ token }: { token: string | undefined }) {
                                     )}
                                     <div
                                         className={`max-w-[90%] p-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'user'
-                                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-100 rounded-tr-sm'
-                                                : 'bg-white/5 border border-white/10 text-slate-300 rounded-tl-sm'
+                                            ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-100 rounded-tr-sm'
+                                            : 'bg-white/5 border border-white/10 text-slate-300 rounded-tl-sm'
                                             }`}
                                         style={{
                                             boxShadow: msg.role === 'user' ? '0 8px 20px -8px rgba(16,185,129,0.2)' : 'none'
@@ -133,6 +151,20 @@ export default function AmbientChat({ token }: { token: string | undefined }) {
                                     >
                                         {msg.content}
                                     </div>
+
+                                    {/* Impact Summary Tag */}
+                                    {msg.role === 'ai' && msg.impactSummary && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="mt-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2 shadow-[0_4px_12px_rgba(16,185,129,0.1)]"
+                                        >
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                                                🌿 {msg.impactSummary}
+                                            </span>
+                                        </motion.div>
+                                    )}
                                 </div>
                             ))}
                             {loading && (
