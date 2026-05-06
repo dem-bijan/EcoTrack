@@ -5,8 +5,49 @@ import { TypeAnimation } from 'react-type-animation';
 import LeaderBoard from "./components/LeaderBoard";
 import { HERO_CONTENT, INFO_CARDS, INITIAL_LEADERBOARD } from "@/lib/constants";
 import { Leaf } from "lucide-react";
+import { useState, useEffect } from "react";
+
+
+
+interface Message {
+  role: "user" | "ai";
+  content: string;
+  impactSummary?: string;
+}
 
 export default function Home() {
+
+  const message1 = "Give 4 Live environmental Data, about CO2 consumption, use and metrics, (ppm, danger...) your answer should be 4 sentences split by the , separator, nothing less nothing more"
+  const message = "Give me 4 phrases in english, seperated by the separator , nothing else nothing more"
+  const [answers, setAnswers] = useState("");
+
+  const sendMessage = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/ai/public", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAnswers(data.response);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+
+  useEffect(() => {
+    sendMessage();
+  }, []);
+
+
+
+
   return (
     <div className="relative min-h-screen text-white selection:bg-emerald-500/20 overflow-x-hidden">
 
@@ -95,16 +136,22 @@ export default function Home() {
 
               {/* Stats */}
               <div className="space-y-3">
-                {HERO_CONTENT.stats.map((stat, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-4 rounded-xl transition-all duration-150 group cursor-default"
-                    style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform" />
-                    <p className="text-sm text-slate-300 font-medium">{stat}</p>
+                {answers ? (
+                  answers.split(',').map((stat, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-4 rounded-xl transition-all duration-150 group cursor-default"
+                      style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 group-hover:scale-150 transition-transform" />
+                      <p className="text-sm text-slate-300 font-medium">{stat.trim()}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p className="text-sm text-slate-400">Loading data...</p>
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Bottom: Timestamp */}

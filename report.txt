@@ -1,0 +1,165 @@
+============================================================================
+============================================================================
+==                                                                        ==
+==                  ECOTRACK: THE COMPLETE TECHNICAL MANUAL               ==
+==                    "From Source Code to Architecture"                  ==
+==                                                                        ==
+============================================================================
+============================================================================
+
+This manual is a deep-dive into the EcoTrack ecosystem. It is intended for
+a technical lead or an interviewee who needs to explain the codebase line-by-line.
+
+----------------------------------------------------------------------------
+I. THE CORE IDEA: SUSTAINABILITY AS A SERVICE
+----------------------------------------------------------------------------
+EcoTrack is not just a dashboard; it is an "Environmental Audit System." 
+The goal is to solve the problem of "Vague Intent." Most people want to be 
+green but don't know how to quantify it. EcoTrack uses AI to:
+1. Parse natural language into structured environmental logs.
+2. Calculate CO2 impact dynamically.
+3. Enforce strict cross-device session security.
+
+----------------------------------------------------------------------------
+II. HOW SPRING BOOT WORKS (THE ENGINE)
+----------------------------------------------------------------------------
+To understand EcoTrack, you must understand these Spring concepts:
+
+1. Inversion of Control (IoC) & Dependency Injection (DI):
+   - In standard Java, you do: `Service s = new Service();`
+   - In Spring, you do: `@Autowired private Service s;`
+   - WHY? Spring owns the "Context." It creates the objects (Beans) and 
+     injects them where needed. This makes the code decoupled and modular.
+
+2. Spring Beans:
+   - Every class marked with @Component, @Service, or @Repository is a "Bean."
+   - By default, they are Singletons (one instance per application).
+
+3. The Filter Chain:
+   - Before a request hits your Controller, it passes through a "Chain" of 
+     filters. Our `JwtAuthenticationFilter` is a custom link in this chain.
+
+----------------------------------------------------------------------------
+III. BACKEND CLASS-BY-CLASS BREAKDOWN
+----------------------------------------------------------------------------
+
+--- [ A. THE SECURITY LAYER ] ---
+
+1. JwtService.java
+   - Purpose: The "Mathematician." It handles the logic of JWTs.
+   - Key Functions:
+     * `generateToken(email)`: Uses HMAC-SHA256 to sign a payload containing 
+       the user's identity and an "Issued At" (iat) timestamp.
+     * `extractUsername(token)`: Decodes the token to find out who it belongs to.
+     * `extractIssuedAt(token)`: Critically extracts the EXACT millisecond the 
+       token was created (used for session validation).
+
+2. SessionService.java
+   - Purpose: The "Bouncer." It manages the stateful part of our security.
+   - Key Functions:
+     * `registerNewSession(email, issuedAt)`: Saves the user's latest login 
+       timestamp to MongoDB.
+     * `isTokenValidForSession(email, tokenIat)`: Compares the token in the 
+       request with the one in MongoDB. If they don't match, it means the 
+       user logged in elsewhere, and this token is now "stale."
+
+3. JwtAuthenticationFilter.java
+   - Purpose: The "Gatekeeper." It intercepts every single API call.
+   - Logic:
+     1. Look for "Authorization: Bearer <token>" header.
+     2. Ask JwtService: "Is this signature valid?"
+     3. Ask SessionService: "Is this the current active session for this user?"
+     4. If yes, tell Spring: "This user is authenticated for this request."
+
+--- [ B. THE SERVICE LAYER (Business Logic) ] ---
+
+4. ActivityService.java
+   - Purpose: The "Accountant." It processes environmental actions.
+   - Function: `logActivity(email, activity)`
+     * Uses @Transactional: This is vital. If saving the activity works but 
+       updating the user's points fails, @Transactional "rolls back" the DB 
+       to prevent corrupted data.
+     * It maps the activity to the User entity fetched via `userRepository.findByEmail`.
+
+5. AiPublicController.java & AiService logic
+   - Purpose: The "Orchestrator."
+   - Idea: It takes a user's chat message, sends it to the AI, and then 
+     "parses" the result. 
+   - Function: It looks for patterns like `[LOG:{...}]`. If found, it 
+     automatically calls `activityService.logActivity()`. This is how 
+     conversation becomes data.
+
+--- [ C. THE REPOSITORY LAYER (Data Access) ] ---
+
+6. UserRepository / ActivityRepository / UserAchievementRepository
+   - These extend `JpaRepository<Entity, ID>`. 
+   - Idea: Spring Data JPA generates the SQL for you. 
+   - Example: `findByEmail(String email)` is converted into 
+     `SELECT * FROM users WHERE email = ?` automatically.
+
+----------------------------------------------------------------------------
+IV. THE DATABASE DESIGN
+----------------------------------------------------------------------------
+
+1. PostgreSQL (Relational - ACID Compliant)
+   - Tables: `users`, `activities`, `achievements`, `user_achievements`.
+   - Why? We need "Relational Integrity." An activity MUST belong to a user. 
+     PostgreSQL enforces this with Foreign Keys.
+   - Achievements: Uses a "Join Table" (`user_achievements`) to link users 
+     to multiple achievements (Many-to-Many).
+
+2. MongoDB (Document-Oriented)
+   - Collection: `user_sessions`.
+   - Why? Session data is "Schema-less" and temporary. MongoDB handles 
+     high-frequency writes/reads faster than Postgres for this specific task.
+   - Format: `{ "_id": "email", "lastIssuedAt": "1715000000", "loginTime": "..." }`
+
+----------------------------------------------------------------------------
+V. THE FRONTEND: NEXT.JS ARCHITECTURE
+----------------------------------------------------------------------------
+
+1. middleware.ts (The Edge Gatekeeper)
+   - It runs before the page renders. 
+   - Logic: `request.cookies.get('jwt_token')`. If it's missing and you're 
+     on `/dashboard`, it forces a redirect to `/`.
+
+2. Dashboard/page.tsx (Server-Side Component)
+   - It fetches data directly from the Spring Boot API using `fetch`.
+   - Rationale: Since it's a Server Component, the API calls happen on the 
+     server. The user's browser never sees the backend URL or the internal 
+     data structure—only the final HTML.
+
+3. AchievementsList.tsx & LiveActivityTable.tsx
+   - These are "UI Components." They take raw data arrays from the 
+     Dashboard and render them with Framer Motion for a "Live" feel.
+
+----------------------------------------------------------------------------
+VI. DESIGN PATTERNS IN USE
+----------------------------------------------------------------------------
+
+1. Singleton: Spring Services are created once.
+2. Factory: Spring's `BeanFactory` creates objects for you.
+3. Proxy: When you use @Transactional, Spring creates a "Proxy" around 
+   your class to handle the DB commit/rollback.
+4. DTO (Data Transfer Object): Decouples the API from the Database.
+5. Builder Pattern: Used in `JwtService` to construct JWTs.
+
+----------------------------------------------------------------------------
+VII. ALTERNATIVES TO CONSIDER (FOR THE INTERVIEW)
+----------------------------------------------------------------------------
+
+- Authentication: Could use "OAuth2" (Google/Github login). We used JWT 
+  for complete control over session state.
+- Database: Could use "Redis" for sessions. Redis is even faster (In-memory), 
+  but MongoDB gives us better persistence if the server restarts.
+- Frontend: Could use "React Query" for data fetching. We used Next.js 
+  Server Components because they are faster and better for SEO.
+
+----------------------------------------------------------------------------
+FINAL TIP FOR THE INTERVIEW:
+If they ask "What was the hardest part?", talk about the **Session 
+Synchronization**. Explain how you had to ensure that a JWT issued by 
+Spring matches the exact timestamp in MongoDB to prevent unauthorized 
+concurrent access. This shows you understand both Security and Distributed 
+Data.
+============================================================================

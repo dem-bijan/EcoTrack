@@ -4,9 +4,7 @@ import Navbar from "@/app/components/Navbar";
 import AmbientChat from "@/app/components/AmbientChat";
 import { TrendingDown, Zap, BarChart3, Clock, AlertCircle, Sparkles, ArrowUpRight } from "lucide-react";
 import RecommendationsList from "@/app/components/RecommendationsList";
-import { cache } from "react";
-import AchievementsList from "@/app/components/AchievementsList";
-
+import AchievementsList from "@/app/components/AchievementsList"
 
 type JwtPayload = {
     sub: string;
@@ -155,7 +153,7 @@ export default async function DashboardPage() {
                     })}
                 </div>
 
-                <AchievementsList achievements={achievements}></AchievementsList>
+
 
                 {/* ── Main Content Grid ────────────────────────────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -171,61 +169,15 @@ export default async function DashboardPage() {
                                 Archive <ArrowUpRight className="w-3 h-3" />
                             </button>
                         </div>
+                        <AchievementsList achievements={achievements} />
 
-                        <div className="panel rounded-2xl overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                                            <th className="py-4 px-5 eyebrow">Event</th>
-                                            <th className="py-4 px-5 eyebrow">Category</th>
-                                            <th className="py-4 px-5 eyebrow">Date</th>
-                                            <th className="py-4 px-5 eyebrow text-right">Impact</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {activities.length > 0 ? (
-                                            activities.map((act: any, i: number) => (
-                                                <tr
-                                                    key={i}
-                                                    className="group transition-colors hover:bg-white/[0.02] border-b last:border-0"
-                                                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-                                                >
-                                                    <td className="py-4 px-5">
-                                                        <span className="text-sm text-slate-300 font-medium group-hover:text-white transition-colors">
-                                                            {act.description}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 px-5">
-                                                        <span className="tag uppercase">{act.activityCategory}</span>
-                                                    </td>
-                                                    <td className="py-4 px-5">
-                                                        <span className="text-xs text-slate-600 font-mono">
-                                                            {new Date(act.activityDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 px-5 text-right">
-                                                        <span className={`text-sm font-bold font-mono ${act.co2Impact > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                                            {act.co2Impact > 0 ? `+${act.co2Impact}` : act.co2Impact} kg
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={4} className="py-20 text-center">
-                                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest opacity-40">
-                                                        No activities recorded yet.
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div className="mt-12 mb-4">
+                            <h2 className="text-xs font-bold text-white uppercase tracking-[0.25em] flex items-center gap-2">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                Community Leaderboard
+                            </h2>
                         </div>
                     </div>
-
                     {/* Sidebar: Insights */}
                     <div className="space-y-5">
                         <h2 className="text-xs font-bold text-white uppercase tracking-[0.25em] flex items-center gap-2 mb-4">
