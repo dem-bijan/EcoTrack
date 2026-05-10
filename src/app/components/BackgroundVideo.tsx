@@ -8,9 +8,10 @@ export default function BackgroundVideo() {
             <Image
                 width={1920}
                 height={1080}
-                src="/forest.jpg"
+                src="/nature2.jpg"
                 alt="Background Image"
-                className="w-full h-full object-cover opacity-60 scale-105 blur-[2px]"
+                className="w-full h-full object-cover opacity-60 blur-[2px]"
+                unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
             <div className="absolute inset-0 hero-gradient opacity-50" />

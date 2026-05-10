@@ -134,7 +134,7 @@ V. THE FRONTEND: NEXT.JS ARCHITECTURE
      Dashboard and render them with Framer Motion for a "Live" feel.
 
 ----------------------------------------------------------------------------
-VI. DESIGN PATTERNS IN USE
+VI. DESIGN PATTERNS IN USE 
 ----------------------------------------------------------------------------
 
 1. Singleton: Spring Services are created once.

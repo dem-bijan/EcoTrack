@@ -4,7 +4,8 @@
       "WebFetch(domain:webdorks.com)",
       "Bash(npm init *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node *)"
     ]
   }
 }

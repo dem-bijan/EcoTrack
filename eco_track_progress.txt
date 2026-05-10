@@ -1,26 +1,84 @@
-ECOTRACK PROJECT PROGRESS REPORT
------------------------------
-Last Updated: 2026-05-01
+=============================================================
+           ECOTRACK: PROJECT ARCHITECTURE & PROGRESS REPORT
+=============================================================
+Last Updated: 2026-05-08
 
-1. PROJECT SUMMARY
-EcoTrack is a sustainability platform designed to track and reduce carbon footprints. It uses a high-end glassmorphic UI (Next.js) and a powerful Spring Boot backend.
+1. EXECUTIVE SUMMARY
+EcoTrack is a state-of-the-art sustainability and carbon footprint tracking platform. It leverages an AI-driven conversational interface (the "Sustainability Auditor") to seamlessly extract ecological data from natural user input. The application features a high-performance Spring Boot backend with dual-database persistence, feeding real-time updates to a premium, glassmorphic Next.js frontend via WebSockets.
 
-2. COMPLETED MILESTONES
-- UI/UX: Implemented landing page, dashboard, and onboarding with glassmorphism and Framer Motion.
-- AI Integration: Successfully switched from local Ollama to NVIDIA's GPT-OSS-120B model (hosted via NVIDIA Integrate API).
-- Backend Foundation: Created 'Activity' infrastructure (Entity, Repository, Service) to support persistent tracking.
-- AI Logic: Refactored AiController into a "Sustainability Auditor" that extracts JSON data [LOG:...] from natural conversation.
-- Security: Integrated JWT authentication with Spring Security for safe activity logging.
+2. TECHNOLOGY STACK & ARCHITECTURE
+- Frontend: Next.js (App Router), React 19, Tailwind CSS, Framer Motion, Recharts, Lucide Icons.
+- Backend: Java 17+, Spring Boot, Spring Security, Spring WebSockets (STOMP).
+- Primary Database (SQL): PostgreSQL (handles relational business logic, users, logs, and footprints).
+- Ephemeral Database (NoSQL): MongoDB (handles fast, document-based 24-hour chat history persistence).
+- AI Engine: NVIDIA Integrate API (GPT-OSS-120B) for zero-latency NLP data extraction.
 
-3. CURRENT SYSTEM STATE
-- Backend: Exposes /api/ai which accepts a ChatRequest DTO (with conversation history).
-- AI Persona: Configured with a detailed system prompt including specific emission factors for transportation, food, energy, shopping, and waste.
-- Data Flow: AI extracts data -> Controller parses JSON -> Service saves to PostgreSQL using the current user's security context.
+3. COMPLETED MILESTONES & CORE FEATURES
 
-4. NEXT STEPS
-- Frontend: Sync AmbientChat.tsx to send conversation history instead of single messages.
-- Dashboards: Implement data visualization for the logged activities.
-- Real-time Updates: Use WebSockets or polling to update the efficiency index immediately after AI logs an activity.
+[A] UI/UX & Design System
+- Engineered a cohesive, premium "Glassmorphism" aesthetic using semi-transparent surfaces, dynamic backdrop blurs, and an immersive dark mode palette (Slate/Emerald/Blue).
+- Implemented Framer Motion for buttery-smooth page transitions and micro-animations.
+- Built custom responsive layouts: Auth forms, Onboarding wizards, and a centralized Dashboard command center.
+- Designed custom sleek scrollbars and sticky headers for dense data components to preserve vertical screen real estate.
 
-5. DATABASE SCHEMA
-Refer to database_schema.sql for the current 13-table structure.
+[B] AI "Sustainability Auditor" Integration
+- Transitioned from local Ollama instances to NVIDIA's cloud API for reliable, lightning-fast inference.
+- Engineered a strict System Prompt enforcing a specific AI persona.
+- Developed a highly customized regex and JSON parser within `AiController` to invisibly extract formatted strings (`[LOG: {"co2": ...}]`, `[FP: ...]`, `[REC: ...]`) from conversational text.
+- Ensured AI responses dynamically calculate baseline footprints and activity deltas using standardized ecological formulas.
+
+[C] Authentication & Security
+- Built a robust JWT-based authentication pipeline.
+- Backend: Configured `JwtAuthenticationFilter` to secure endpoints, extract tokens, and populate Spring's `SecurityContextHolder`.
+- Frontend: Next.js middleware/server-side components securely extract JWTs from HTTP-only cookies and protect routing logic.
+
+[D] Data Persistence & Analytics
+- Chat History: Integrated MongoDB via `SessionService` to map conversation logs to users, auto-pruning messages older than 24 hours to save space.
+- Activity Logs: Successfully map AI `[LOG:]` outputs directly into the PostgreSQL `activities` table.
+- Carbon Footprint Engine: Calculates a daily *average* carbon footprint (averaging multiple updates per day via Java Streams) to plot a precise, smooth historical trajectory without duplicate data points.
+
+[E] Real-Time Event Driven Architecture
+- Implemented Spring Boot WebSockets with STOMP broadcasting.
+- When the AI logs a new activity or updates the footprint, the backend fires a `REFETCH` ping to the specific user's private `/topic/updates/{email}` channel.
+- The React frontend uses `sockjs-client` and `@stomp/stompjs` to listen for these pings, triggering instant data re-fetches.
+- Results in real-time `TrendChart` and `LiveActivityTable` updates with zero page-reloads.
+
+4. CURRENT DASHBOARD COMPONENTS
+- Carbon Score Gauge: Displays total live cumulative footprint in Tons.
+- TrendChart: A customized Recharts AreaChart with SVG glow filters, mapping daily footprint averages.
+- LiveActivityTable: A vertically scrollable, sticky-header table showing all logged events, classifications, timestamps, and kg deltas.
+- Metrics Ribbon: Quick stats highlighting total footprint, efficiency index vs baseline, and active log counts.
+
+5. PENDING TASKS & NEXT STEPS
+- The Recommendations Hub: Build an interactive UI to display AI-generated `[REC:]` tags saved in Postgres, allowing users to accept or dismiss actionable sustainability advice.
+- Achievements System: Complete the backend triggers and frontend notifications for the `achievements` table. (In Progress: Integrated with Challenges)
+- Activity Feed Timeline: Build a vertical, chronological timeline UI for a more narrative-driven transaction history.
+- Mobile Optimization: Refine the dense dashboard flex-grids and glass panels to respond perfectly on mobile viewports.
+- Settings Module: Implement profile picture uploads, timezone configurations, and goal setting.
+
+6. CHALLENGES & HYPER-PERSONALIZATION (ROADMAP)
+[A] Phase 1: The Challenge Foundation (Backend)
+- Build `Challenge.java` and `UserChallenge.java` entities.
+- Implement `ChallengeService` to process activities from ALL sources (AI/Manual) and update progress live.
+- Build the API for browsing and accepting active quests.
+
+[B] Phase 2: AI Hyper-Personalization (The Brain)
+- Dynamic Context Injection: Feed User Profile (Diet, Transport, Home) and Real-time Stats (Efficiency Index) into AI System Prompts.
+- Dynamic Quest Generation: Enable `[CHALLENGE:]` tag for AI-driven, data-tailored challenges.
+- Contextual Memory: Enable `[UPDATE_PROFILE:]` tag for AI to "remember" lifestyle changes via the `preferences` JSONB column.
+
+[C] Phase 3: Gamification & UX
+- Bridge Challenge completion to the Achievement/Badge system.
+- Implement WebSocket progress synchronization for live-filling dashboard progress bars.
+- Build the "Challenges Hub" and "Celebration Logic" on the frontend.
+
+7. DATABASE SCHEMA SNAPSHOT
+(Refer to database_schema.sql for the 13-table DDL)
+- users: Core identity and auth.
+- user_sessions: MongoDB ephemeral chat context.
+- activities: Discrete logged ecological actions (driving, eating).
+- carbon_footprints: Historical cumulative scoring.
+- recommendations: AI-suggested actionable items.
+- achievements: Gamification milestones.
+- challenges / user_challenges: (Planned) Dynamic quest tracking.
+

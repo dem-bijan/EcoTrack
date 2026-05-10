@@ -22,6 +22,30 @@ export default function AmbientChat({ token }: { token: string | undefined }) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+
+                const res = await fetch("http://localhost:8080/api/ai/history", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        setChatHistory(data)
+                    }
+                }
+            }
+            catch (err) {
+                console.error("Failed to fetch chat history", err);
+            }
+        };
+        if (token) {
+            fetchHistory();
+        }
+    }, [token]);
+
+
+    useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
